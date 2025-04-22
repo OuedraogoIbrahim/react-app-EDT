@@ -19,6 +19,26 @@ const initialState: SideMenuState = {
   menu: [
     "DASHBOARDS",
     {
+      icon: "BookOpen",
+      pathname: "/filieres",
+      title: "Filièr",
+    },
+    {
+      icon: "Book",
+      pathname: "/matieres",
+      title: "Matières",
+    },
+    {
+      icon: "Clock",
+      pathname: "/emploi-du-temps",
+      title: "Emploi du Temps",
+    },
+    {
+      icon: "Clock",
+      pathname: "/niveaux",
+      title: "Niveaux",
+    },
+    {
       icon: "GaugeCircle",
       pathname: "/",
       title: "E-Commerce",

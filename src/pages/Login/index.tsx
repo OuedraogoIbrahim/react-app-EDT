@@ -1,14 +1,89 @@
 import { FormCheck, FormInput, FormLabel } from "@/components/Base/Form";
-import Tippy from "@/components/Base/Tippy";
-import users from "@/fakers/users";
 import Button from "@/components/Base/Button";
 import Alert from "@/components/Base/Alert";
 import Lucide from "@/components/Base/Lucide";
 import clsx from "clsx";
 import _ from "lodash";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { validators } from "@/utils/validators";
+import { authentification } from "@/services/auth";
+import LoadingIcon from "@/components/Base/LoadingIcon";
+import { API_URL } from "@/constants";
+
+interface FormState {
+  email: string;
+  password: string;
+}
+
+interface FormErrors {
+  email?: string;
+  password?: string;
+}
 
 function Main() {
+  const nav = useNavigate();
+  const { login } = authentification();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormState>({
+    email: "",
+    password: "",
+  });
+
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (formErrors[name as keyof FormErrors]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const validationErrors = validators.validateForm(formData, {
+      email: [validators.required, validators.email],
+      password: [validators.required, validators.minLength(8)],
+    });
+
+    if (Object.keys(validationErrors).length > 0) {
+      setFormErrors(validationErrors);
+      return;
+    }
+    try {
+      setLoading(true);
+      await login(formData.email, formData.password);
+      nav("/emploi-du-temps");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = API_URL + "/api/auth/google/redirect";
+  };
+
+  const handleGithubLogin = () => {
+    window.location.href = API_URL + "/api/auth/github/redirect";
+  };
+
+  const handleFacebookLogin = () => {
+    alert("Pas encore implemeter");
+    // window.location.href = API_URL + "/api/auth/facebook/redirect";
+  };
+
   return (
     <>
       <div className="container grid lg:h-screen grid-cols-12 lg:max-w-[1550px] 2xl:max-w-[1750px] py-10 px-5 sm:py-14 sm:px-10 md:px-36 lg:py-0 lg:pl-14 lg:pr-12 xl:px-24">
@@ -19,22 +94,13 @@ function Main() {
           ])}
         >
           <div className="relative z-10 flex flex-col justify-center w-full h-full py-2 lg:py-32">
-            <div className="rounded-[0.8rem] w-[55px] h-[55px] border border-primary/30 flex items-center justify-center">
-              <div className="relative flex items-center justify-center w-[50px] rounded-[0.6rem] h-[50px] bg-gradient-to-b from-theme-1/90 to-theme-2/90 bg-white">
-                <div className="w-[26px] h-[26px] relative -rotate-45 [&_div]:bg-white">
-                  <div className="absolute w-[20%] left-0 inset-y-0 my-auto rounded-full opacity-50 h-[75%]"></div>
-                  <div className="absolute w-[20%] inset-0 m-auto h-[120%] rounded-full"></div>
-                  <div className="absolute w-[20%] right-0 inset-y-0 my-auto rounded-full opacity-50 h-[75%]"></div>
-                </div>
-              </div>
-            </div>
             <div className="mt-10">
-              <div className="text-2xl font-medium">Sign In</div>
+              <div className="text-2xl font-medium">Connexion</div>
               <div className="mt-2.5 text-slate-600 dark:text-slate-400">
-                Don't have an account?{" "}
-                <a className="font-medium text-primary" href="">
-                  Sign Up
-                </a>
+                Pas de compte?{" "}
+                <Link className="font-medium text-primary" to="/register">
+                  S'inscrire
+                </Link>
               </div>
               <Alert
                 variant="outline-primary"
@@ -49,72 +115,108 @@ function Main() {
                       />
                     </div>
                     <div className="ml-1 mr-8">
-                      Welcome to <span className="font-medium">Tailwise</span>{" "}
-                      demo! Simply click{" "}
-                      <span className="font-medium">Sign In</span> to explore
-                      and access our documentation.
+                      Bienvenue sur notre{" "}
+                      <span className="font-medium">Plateforme</span> ! Cliquez
+                      simplement sur{" "}
+                      <span className="font-medium">Se connecter</span>
                     </div>
                     <Alert.DismissButton
                       type="button"
                       className="btn-close text-primary"
                       onClick={dismiss}
-                      aria-label="Close"
+                      aria-label="Fermer"
                     >
                       <Lucide icon="X" className="w-5 h-5" />
                     </Alert.DismissButton>
                   </>
                 )}
               </Alert>
-              <div className="mt-6">
-                <FormLabel>Email*</FormLabel>
-                <FormInput
-                  type="text"
-                  className="block px-4 py-3.5 rounded-[0.6rem] border-slate-300/80"
-                  placeholder={users.fakeUsers()[0].email}
-                />
-                <FormLabel className="mt-4">Password*</FormLabel>
-                <FormInput
-                  type="password"
-                  className="block px-4 py-3.5 rounded-[0.6rem] border-slate-300/80"
-                  placeholder="************"
-                />
-                <div className="flex mt-4 text-xs text-slate-500 sm:text-sm">
-                  <div className="flex items-center mr-auto">
-                    <FormCheck.Input
-                      id="remember-me"
-                      type="checkbox"
-                      className="mr-2.5 border"
-                    />
-                    <label
-                      className="cursor-pointer select-none"
-                      htmlFor="remember-me"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-                  <a href="">Forgot Password?</a>
+              <form className="mt-6" onSubmit={handleSubmit}>
+                <div className="mb-5">
+                  <FormLabel>Email*</FormLabel>
+                  <FormInput
+                    type="text"
+                    name="email"
+                    className={`block px-4 py-3.5 rounded-[0 Niemiec
+                    .6rem] border-slate-300/80 ${
+                      formErrors.email ? "border-red-500" : ""
+                    }`}
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  {formErrors.email && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.email}
+                    </p>
+                  )}
                 </div>
-                <div className="mt-5 text-center xl:mt-8 xl:text-left">
+                <div className="mb-5">
+                  <FormLabel className="mt-4">Mot de passe*</FormLabel>
+                  <FormInput
+                    type="password"
+                    name="password"
+                    className={`block px-4 py-3.5 rounded-[0.6rem] border-slate-300/80 ${
+                      formErrors.password ? "border-red-500" : ""
+                    }`}
+                    placeholder="************"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  {formErrors.password && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.password}
+                    </p>
+                  )}
+                </div>
+                <div className="mt-5 text-center xl:mt-8 xl:text-left space-y-4">
                   <Button
                     variant="primary"
                     rounded
                     className="bg-gradient-to-r from-theme-1/70 to-theme-2/70 w-full py-3.5 xl:mr-3 dark:border-darkmode-400"
                   >
-                    Sign In
+                    {loading ? (
+                      <LoadingIcon
+                        icon="tail-spin"
+                        className="w-8 h-8 mx-auto"
+                        color="white"
+                      />
+                    ) : (
+                      "Se connecter"
+                    )}
                   </Button>
-                  <Button
-                    variant="outline-secondary"
-                    rounded
-                    className="bg-white/70 w-full py-3.5 mt-3 dark:bg-darkmode-400"
-                  >
-                    Sign Up
-                  </Button>
+                  <div className="text-slate-600 dark:text-slate-400 text-sm mt-6">
+                    Ou connectez-vous avec
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      onClick={handleGoogleLogin}
+                      className="flex items-center justify-center w-full sm:w-1/3 py-2 border border-slate-300/80 rounded-[0.6rem] hover:bg-slate-50 dark:border-darkmode-400 dark:hover:bg-darkmode-500"
+                    >
+                      <Lucide icon="Chrome" className="w-5 h-5 mr-2" />
+                      Google
+                    </Button>
+                    <Button
+                      onClick={handleGithubLogin}
+                      className="flex items-center justify-center w-full sm:w-1/3 py-2 border border-slate-300/80 rounded-[0.6rem] hover:bg-slate-50 dark:border-darkmode-400 dark:hover:bg-darkmode-500"
+                    >
+                      <Lucide icon="Github" className="w-5 h-5 mr-2" />
+                      GitHub
+                    </Button>
+                    <Button
+                      onClick={handleFacebookLogin}
+                      className="flex items-center justify-center w-full sm:w-1/3 py-2 border border-slate-300/80 rounded-[0.6rem] hover:bg-slate-50 dark:border-darkmode-400 dark:hover:bg-darkmode-500"
+                    >
+                      <Lucide icon="Facebook" className="w-5 h-5 mr-2" />
+                      Facebook
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
+
       <div className="fixed container grid w-screen inset-0 h-screen grid-cols-12 lg:max-w-[1550px] 2xl:max-w-[1750px] pl-14 pr-12 xl:px-24">
         <div
           className={clsx([
@@ -132,56 +234,12 @@ function Main() {
         >
           <div className="sticky top-0 z-10 flex-col justify-center hidden h-screen ml-16 lg:flex xl:ml-28 2xl:ml-36">
             <div className="leading-[1.4] text-[2.6rem] xl:text-5xl font-medium xl:leading-[1.2] text-white">
-              Embrace Excellence <br /> in Dashboard Development
+              Optimisez la Gestion <br /> de l'emploi du temps
             </div>
             <div className="mt-5 text-base leading-relaxed xl:text-lg text-white/70">
-              Unlock the potential of Tailwise, where developers craft
-              meticulously structured, visually stunning dashboards with
-              feature-rich modules. Join us today to shape the future of your
-              application development.
-            </div>
-            <div className="flex flex-col gap-3 mt-10 xl:items-center xl:flex-row">
-              <div className="flex items-center">
-                <div className="w-9 h-9 2xl:w-11 2xl:h-11 image-fit zoom-in">
-                  <Tippy
-                    as="img"
-                    alt="Tailwise - Admin Dashboard Template"
-                    className="rounded-full border-[3px] border-white/50"
-                    src={users.fakeUsers()[0].photo}
-                    content={users.fakeUsers()[0].name}
-                  />
-                </div>
-                <div className="-ml-3 w-9 h-9 2xl:w-11 2xl:h-11 image-fit zoom-in">
-                  <Tippy
-                    as="img"
-                    alt="Tailwise - Admin Dashboard Template"
-                    className="rounded-full border-[3px] border-white/50"
-                    src={users.fakeUsers()[0].photo}
-                    content={users.fakeUsers()[0].name}
-                  />
-                </div>
-                <div className="-ml-3 w-9 h-9 2xl:w-11 2xl:h-11 image-fit zoom-in">
-                  <Tippy
-                    as="img"
-                    alt="Tailwise - Admin Dashboard Template"
-                    className="rounded-full border-[3px] border-white/50"
-                    src={users.fakeUsers()[0].photo}
-                    content={users.fakeUsers()[0].name}
-                  />
-                </div>
-                <div className="-ml-3 w-9 h-9 2xl:w-11 2xl:h-11 image-fit zoom-in">
-                  <Tippy
-                    as="img"
-                    alt="Tailwise - Admin Dashboard Template"
-                    className="rounded-full border-[3px] border-white/50"
-                    src={users.fakeUsers()[0].photo}
-                    content={users.fakeUsers()[0].name}
-                  />
-                </div>
-              </div>
-              <div className="text-base xl:ml-2 2xl:ml-3 text-white/70">
-                Over 7k+ strong and growing! Your journey begins here.
-              </div>
+              Simplifiez la gestion de vos contacts avec notre solution
+              intuitive et efficace. Organisez, suivez et centralisez toutes vos
+              interactions en un seul endroit pour une productivité optimale.
             </div>
           </div>
         </div>

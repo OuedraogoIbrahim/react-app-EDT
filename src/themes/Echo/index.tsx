@@ -16,10 +16,10 @@ import users from "@/fakers/users";
 import clsx from "clsx";
 import SimpleBar from "simplebar";
 import { Menu } from "@/components/Base/Headless";
-import QuickSearch from "@/components/QuickSearch";
-import SwitchAccount from "@/components/SwitchAccount";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import ActivitiesPanel from "@/components/ActivitiesPanel";
+import { authentification } from "@/services/auth";
+import LoadingIcon from "@/components/Base/LoadingIcon";
 
 function Main() {
   const dispatch = useAppDispatch();
@@ -28,12 +28,14 @@ function Main() {
     localStorage.setItem("compactMenu", val.toString());
     dispatch(setCompactMenuStore(val));
   };
-  const [quickSearch, setQuickSearch] = useState(false);
-  const [switchAccount, setSwitchAccount] = useState(false);
   const [notificationsPanel, setNotificationsPanel] = useState(false);
   const [activitiesPanel, setActivitiesPanel] = useState(false);
   const [compactMenuOnHover, setCompactMenuOnHover] = useState(false);
   const [activeMobileMenu, setActiveMobileMenu] = useState(false);
+
+  const { logout } = authentification();
+  const [loading, setLoading] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
   const [formattedMenu, setFormattedMenu] = useState<
@@ -366,16 +368,6 @@ function Main() {
                 >
                   <Lucide icon="AlignJustify" className="w-[18px] h-[18px]" />
                 </a>
-                <a
-                  href=""
-                  className="p-2 text-white rounded-full hover:bg-white/5"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setQuickSearch(true);
-                  }}
-                >
-                  <Lucide icon="Search" className="w-[18px] h-[18px]" />
-                </a>
               </div>
               {/* BEGIN: Breadcrumb */}
               <Breadcrumb light className="flex-1 hidden xl:block">
@@ -383,38 +375,26 @@ function Main() {
                   className="dark:before:bg-chevron-white"
                   to="/"
                 >
-                  App
-                </Breadcrumb.Link>
-                <Breadcrumb.Link
-                  className="dark:before:bg-chevron-white"
-                  to="/"
-                >
-                  Dashboards
+                  Appliction
                 </Breadcrumb.Link>
                 <Breadcrumb.Link
                   className="dark:before:bg-chevron-white"
                   to="/"
                   active={true}
                 >
-                  Analytics
+                  Gestion Emploi du temps
                 </Breadcrumb.Link>
+                {/* <Breadcrumb.Link
+                  className="dark:before:bg-chevron-white"
+                  to="/"
+                  active={true}
+                >
+                  Analytics
+                </Breadcrumb.Link> */}
               </Breadcrumb>
               {/* END: Breadcrumb */}
               {/* BEGIN: Search */}
-              <div
-                className="relative justify-center flex-1 hidden xl:flex"
-                onClick={() => setQuickSearch(true)}
-              >
-                <div className="bg-white/[0.12] dark:bg-darkmode-900/30 dark:border-transparent border-transparent border w-[350px] flex items-center py-2 px-3.5 rounded-[0.5rem] text-white/60 cursor-pointer hover:bg-white/[0.15] transition-colors duration-300 hover:duration-100">
-                  <Lucide icon="Search" className="w-[18px] h-[18px]" />
-                  <div className="ml-2.5 mr-auto">Quick search...</div>
-                  <div>⌘K</div>
-                </div>
-              </div>
-              <QuickSearch
-                quickSearch={quickSearch}
-                setQuickSearch={setQuickSearch}
-              />
+
               {/* END: Search */}
               {/* BEGIN: Notification & User Menu */}
               <div className="flex items-center flex-1">
@@ -460,20 +440,11 @@ function Main() {
                   <Menu.Items className="w-56 mt-1">
                     <Menu.Item
                       onClick={() => {
-                        setSwitchAccount(true);
-                      }}
-                    >
-                      <Lucide icon="ToggleLeft" className="w-4 h-4 mr-2" />
-                      Switch Account
-                    </Menu.Item>
-                    <Menu.Divider />
-                    <Menu.Item
-                      onClick={() => {
                         navigate("settings?page=connected-services");
                       }}
                     >
                       <Lucide icon="Settings" className="w-4 h-4 mr-2" />
-                      Connected Services
+                      Connection par réseau
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
@@ -481,7 +452,7 @@ function Main() {
                       }}
                     >
                       <Lucide icon="Inbox" className="w-4 h-4 mr-2" />
-                      Email Settings
+                      Email
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
@@ -489,7 +460,7 @@ function Main() {
                       }}
                     >
                       <Lucide icon="Lock" className="w-4 h-4 mr-2" />
-                      Reset Password
+                      Réinitialiser le mot de passe
                     </Menu.Item>
                     <Menu.Divider />
                     <Menu.Item
@@ -498,15 +469,18 @@ function Main() {
                       }}
                     >
                       <Lucide icon="Users" className="w-4 h-4 mr-2" />
-                      Profile Info
+                      Profile
                     </Menu.Item>
                     <Menu.Item
-                      onClick={() => {
+                      onClick={async () => {
+                        setLoading(true);
+                        await logout();
+                        setLoading(false);
                         navigate("login");
                       }}
                     >
                       <Lucide icon="Power" className="w-4 h-4 mr-2" />
-                      Logout
+                      Déconnexion
                     </Menu.Item>
                   </Menu.Items>
                 </Menu>
@@ -518,10 +492,6 @@ function Main() {
               <NotificationsPanel
                 notificationsPanel={notificationsPanel}
                 setNotificationsPanel={setNotificationsPanel}
-              />
-              <SwitchAccount
-                switchAccount={switchAccount}
-                setSwitchAccount={setSwitchAccount}
               />
               {/* END: Notification & User Menu */}
             </div>
@@ -536,10 +506,19 @@ function Main() {
           { "mode--light": !topBarActive },
         ])}
       >
-        <div className="px-5 mt-16">
-          <div className="container">
-            <Outlet />
+        {loading && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-75">
+            <div className="flex flex-col items-center justify-end col-span-6 sm:col-span-3 xl:col-span-2">
+              <LoadingIcon icon="ball-triangle" className="w-8 h-8" />
+              <div className="mt-2 text-xs text-center">
+                Déconnexion en cours
+              </div>
+            </div>
           </div>
+        )}
+
+        <div className="container">
+          <Outlet />
         </div>
       </div>
     </div>

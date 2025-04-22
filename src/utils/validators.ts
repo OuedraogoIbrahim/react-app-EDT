@@ -25,29 +25,32 @@ export const contactSchema = z.object({
 });
 
 export const validators = {
-    required: (value) => {
+    required: (value: string | number): string | null => {
         return value ? null : "Ce champ est requis";
     },
 
-    minLength: (length) => (value) => {
+    minLength: (length: number) => (value: string): string | null => {
         return value && value.length >= length
             ? null
             : `Le mot de passe doit contenir au moins ${length} caractères`;
     },
 
-    email: (value) => {
+    email: (value: string): string | null => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(value) ? null : "Email invalide";
     },
 
-    phone: (value) => {
+    phone: (value: string): string | null => {
         const phoneRegex =
             /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
         return phoneRegex.test(value) ? null : "Numéro de téléphone invalide";
     },
 
-    validateForm: (values, rules) => {
-        const errors = {};
+    validateForm: (
+        values: { [key: string]: any },
+        rules: { [key: string]: ((value: any) => string | null)[] }
+    ): { [key: string]: string } => {
+        const errors: { [key: string]: string } = {};
         Object.keys(rules).forEach((field) => {
             const fieldRules = rules[field];
             for (const rule of fieldRules) {
