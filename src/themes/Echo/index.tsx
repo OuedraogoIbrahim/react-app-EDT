@@ -399,7 +399,7 @@ function Main() {
               {/* BEGIN: Notification & User Menu */}
               <div className="flex items-center flex-1">
                 <div className="flex items-center gap-1 ml-auto">
-                  <a
+                  {/* <a
                     href=""
                     className="p-2 text-white rounded-full hover:bg-white/5"
                     onClick={(e) => {
@@ -408,7 +408,7 @@ function Main() {
                     }}
                   >
                     <Lucide icon="LayoutGrid" className="w-[18px] h-[18px]" />
-                  </a>
+                  </a> */}
                   <a
                     href=""
                     className="p-2 text-white rounded-full hover:bg-white/5"

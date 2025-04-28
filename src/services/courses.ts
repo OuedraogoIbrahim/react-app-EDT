@@ -8,9 +8,9 @@ interface Cours {
   date: string;
   type: string;
   salle: { nom: string; id: number };
-  matiere: { nom: string; id: number; niveau_id: number };
-  filiere: { nom: string; id: number };
-  niveau: { nom: string; id: number; filiere_id: number };
+  matiere?: { nom: string; id: number; niveau_id: number };
+  filiere?: { nom: string; id: number };
+  niveau?: { nom: string; id: number; filiere_id: number };
 }
 
 interface FormData {
@@ -22,6 +22,29 @@ interface FormData {
   niveau: string;
   salle: string;
   matiere: string;
+}
+
+interface ProvisionalEDT {
+  semestre: string;
+  filiere: string;
+  niveau: string;
+  salle: string;
+  matiere: string[];
+}
+
+interface edtData {
+  date_creation: string;
+  niveau_id: number;
+  date: string;
+  heure_debut: string;
+  heure_fin: string;
+  statut: string;
+  activite: string;
+  type: string;
+  salle_id: number;
+  filiere_id: number;
+  matiere_id: number;
+  count: number;
 }
 
 // Récupérer tous les cours
@@ -110,12 +133,15 @@ export const addCourse = async (cours: FormData): Promise<Cours> => {
     return response.data as Cours;
   } catch (error: unknown) {
     const err = error as AxiosError;
+    console.log(err.response);
+    
     throw err.response?.data || new Error("Erreur lors de l'ajout du cours");
   }
 };
 
+
 // Mettre à jour un cours
-export const updateCourse = async (id: string , cours: Cours): Promise<Cours> => {
+export const updateCourse = async (id: string , cours: FormData): Promise<Cours> => {
   if (!id) throw new Error("L'ID du cours est requis");
   try {
     const response = await configApi.put(`/courses/${id}`, cours);
@@ -126,8 +152,9 @@ export const updateCourse = async (id: string , cours: Cours): Promise<Cours> =>
   }
 };
 
+
 // Supprimer un cours
-export const deleteCourse = async (id: number): Promise<void> => {
+export const deleteCourse = async (id: string): Promise<void> => {
   if (!id) throw new Error("L'ID du cours est requis");
   try {
     await configApi.delete(`/courses/${id}`);
@@ -135,5 +162,29 @@ export const deleteCourse = async (id: number): Promise<void> => {
   } catch (error: unknown) {
     const err = error as AxiosError;
     throw err.response?.data || new Error("Erreur lors de la suppression du cours");
+   }
+};
+
+
+export const getProvisionalEDT = async () => {
+  try {
+    const response = await configApi.get("/emploi-du-temps/provisoire"
+    );
+    return response.data as edtData[];
+  } catch (error: unknown) {
+    const err = error as AxiosError;
+    throw err.response?.data || new Error("Erreur lors de la récupération des cours");
   }
 };
+
+
+// Creation d'un EDT provisoire
+export const provisionalEDT = async (data: ProvisionalEDT) => {
+  try {
+    const response = await configApi.post('emploi-du-temps/provisoire',data)
+    return;
+  } catch (error: unknown) {
+    const err = error as AxiosError;
+    throw err.response?.data || new Error("Erreur lors de la creation de l'emploi du temps provisoire");
+  }
+}

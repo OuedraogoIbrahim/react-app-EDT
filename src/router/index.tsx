@@ -68,6 +68,8 @@ import LoginSuccess from "@/pages/LoginSuccessSocialNetwork";
 import Filiere from "../pages/Filiere";
 import Matiere from "../pages/Matiere";
 import Niveau from "../pages/Niveau";
+import Provisoire from "../pages/Provisoire";
+import Professeur from "../pages/Professeur";
 
 function Router() {
   const routes = [
@@ -98,6 +100,14 @@ function Router() {
             {
               path: "emploi-du-temps",
               element: <Calendar />,
+            },
+            {
+              path: "provisoire",
+              element: <Provisoire />,
+            },
+            {
+              path: "professeurs",
+              element: <Professeur />,
             },
             {
               path: "settings",

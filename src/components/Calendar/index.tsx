@@ -6,7 +6,12 @@ import listPlugin from "@fullcalendar/list";
 import { CalendarOptions, EventClickArg, EventInput } from "@fullcalendar/core";
 import frLocale from "@fullcalendar/core/locales/fr";
 import { useEffect, useState } from "react";
-import { addCourse, getCourses } from "@/services/courses";
+import {
+  addCourse,
+  deleteCourse,
+  getCourses,
+  updateCourse,
+} from "@/services/courses";
 import FullCalendar from "@fullcalendar/react";
 import Button from "../Base/Button";
 import { Slideover } from "../Base/Headless";
@@ -20,6 +25,9 @@ import { getMatieres } from "@/services/matieres";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import Toastify from "toastify-js";
+import Lucide from "@/components/Base/Lucide";
+import Notification from "@/components/Base/Notification";
 
 // Interfaces
 interface Cours {
@@ -121,6 +129,31 @@ function Main() {
     resolver: yupResolver(courseSchema),
   });
 
+  // Fonction utilitaire pour afficher les notifications
+  const showNotification = (type: "success" | "error", message?: string) => {
+    const id =
+      type === "success"
+        ? "#success-notification-content"
+        : "#failed-notification-content";
+    const notificationEl = document
+      .querySelectorAll(id)[0]
+      .cloneNode(true) as HTMLElement;
+    notificationEl.classList.remove("hidden");
+    if (message) {
+      const messageEl = notificationEl.querySelector(".text-slate-500");
+      if (messageEl) messageEl.textContent = message;
+    }
+    Toastify({
+      node: notificationEl,
+      duration: 10000,
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "right",
+      stopOnFocus: true,
+    }).showToast();
+  };
+
   // Chargement initial des données
   useEffect(() => {
     const fetchData = async () => {
@@ -140,6 +173,7 @@ function Main() {
         setEvents(transformCoursesToEvents(coursesData));
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
+        showNotification("error", "Erreur lors du chargement des données.");
       } finally {
         setLoading(false);
       }
@@ -204,14 +238,8 @@ function Main() {
       setValue("title", selectedEvent.title || "");
       setValue("start", selectedEvent.extendedProps?.date);
       setValue("end", selectedEvent.end?.toString().split("T")[0] || "");
-      setValue(
-        "heure_debut",
-        selectedEvent?.extendedProps?.heure_debut || ""
-      );
-      setValue(
-        "heure_fin",
-        selectedEvent?.extendedProps?.heure_fin || ""
-      );
+      setValue("heure_debut", selectedEvent?.extendedProps?.heure_debut || "");
+      setValue("heure_fin", selectedEvent?.extendedProps?.heure_fin || "");
       setValue("type", selectedEvent.extendedProps?.type || "");
       setValue("filiere", filiereId);
       setValue("niveau", selectedEvent.extendedProps?.niveau || "");
@@ -240,22 +268,14 @@ function Main() {
       setValue("heure_debut", "");
       setValue("heure_fin", "");
       setValue("type", "");
-      setValue("filiere", selectedFiliere || "");
-      setValue("niveau", selectedNiveau || "");
+      setValue("filiere", "");
+      setValue("niveau", "");
       setValue("salle", "");
       setValue("matiere", "");
       setFormNiveaux([]);
       setFilteredMatieres([]);
     }
-  }, [
-    selectedEvent,
-    date,
-    selectedFiliere,
-    selectedNiveau,
-    filieres,
-    matieres,
-    setValue,
-  ]);
+  }, [selectedEvent, date, filieres, matieres, setValue]);
 
   const transformCoursesToEvents = (courses: Cours[]): EventInput[] => {
     return courses.map((course) => ({
@@ -289,7 +309,11 @@ function Main() {
   };
 
   const onSubmit = async (data: FormData) => {
-    if (!data.start || !data.end) return;
+    if (!data.start || !data.end) {
+      showNotification("error", "Les dates de début et de fin sont requises.");
+      return;
+    }
+    setLoading(true);
     try {
       if (selectedEvent) {
         const updatedEvents = events.map((event) =>
@@ -307,11 +331,16 @@ function Main() {
                   niveau: data.niveau,
                   salle: data.salle,
                   matiere: data.matiere,
+                  date: data.start,
+                  heure_debut: data.heure_debut,
+                  heure_fin: data.heure_fin,
                 },
               }
             : event
         );
         setEvents(updatedEvents);
+        await updateCourse(selectedEvent.id || "", data);
+        showNotification("success");
       } else {
         const newEvent: EventInput = {
           id: (Math.random() * 1000).toString(),
@@ -325,18 +354,52 @@ function Main() {
             niveau: data.niveau,
             salle: data.salle,
             matiere: data.matiere,
+            date: data.start,
+            heure_debut: data.heure_debut,
+            heure_fin: data.heure_fin,
           },
         };
         setEvents([...events, newEvent]);
         await addCourse(data);
+        showNotification("success");
       }
-      setBasicSlideoverPreview(false);
       reset();
-    } catch (error) {
+      setBasicSlideoverPreview(false);
+    } catch (error: any) {
       console.error(
         "Erreur lors de l'ajout/modification de l'événement :",
         error
       );
+      showNotification("error", error.errors);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEventDelete = async () => {
+    if (!selectedEvent?.id) {
+      showNotification(
+        "error",
+        "Aucun événement sélectionné pour la suppression."
+      );
+      return;
+    }
+    setLoading(true);
+    try {
+      await deleteCourse(selectedEvent.id);
+      setEvents(events.filter((event) => event.id !== selectedEvent.id));
+      showNotification("success", "Événement supprimé avec succès.");
+      setBasicSlideoverPreview(false);
+      setSelectedEvent(null);
+      reset();
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'événement :", error);
+      showNotification(
+        "error",
+        "Erreur lors de la suppression de l'événement."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -663,6 +726,27 @@ function Main() {
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
+                  {selectedEvent ? (
+                    <Button
+                      onClick={() => handleEventDelete()}
+                      variant="danger"
+                      type="button"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <LoadingIcon
+                          icon="tail-spin"
+                          color="black"
+                          className="w-4 h-4"
+                        />
+                      ) : selectedEvent ? (
+                        "Supprimer"
+                      ) : (
+                        "Patientez"
+                      )}
+                    </Button>
+                  ) : null}
+
                   <Button
                     variant="outline-secondary"
                     type="button"
@@ -670,8 +754,18 @@ function Main() {
                   >
                     Annuler
                   </Button>
-                  <Button variant="primary" type="submit">
-                    {selectedEvent ? "Modifier" : "Ajouter"}
+                  <Button variant="primary" type="submit" disabled={loading}>
+                    {loading ? (
+                      <LoadingIcon
+                        icon="tail-spin"
+                        color="white"
+                        className="w-4 h-4"
+                      />
+                    ) : selectedEvent ? (
+                      "Modifier"
+                    ) : (
+                      "Ajouter"
+                    )}
                   </Button>
                 </div>
               </form>
@@ -679,6 +773,27 @@ function Main() {
           </Slideover.Description>
         </Slideover.Panel>
       </Slideover>
+
+      {/* Notifications */}
+      <Notification id="success-notification-content" className="flex hidden">
+        <Lucide icon="CheckCircle" className="text-success" />
+        <div className="ml-4 mr-4">
+          <div className="font-medium">Opération réussie !</div>
+          <div className="mt-1 text-slate-500">
+            L'événement a été {selectedEvent ? "modifié" : "ajouté"} avec
+            succès.
+          </div>
+        </div>
+      </Notification>
+      <Notification id="failed-notification-content" className="flex hidden">
+        <Lucide icon="XCircle" className="text-danger" />
+        <div className="ml-4 mr-4">
+          <div className="font-medium">Échec de l'opération !</div>
+          <div className="mt-1 text-slate-500">
+            Une erreur est survenue. Veuillez vérifier les champs ou réessayer.
+          </div>
+        </div>
+      </Notification>
     </div>
   );
 }

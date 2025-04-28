@@ -17,11 +17,23 @@ export interface SideMenuState {
 
 const initialState: SideMenuState = {
   menu: [
-    "DASHBOARDS",
+    "Tableau de bord",
+    {
+      icon: "GaugeCircle",
+      pathname: "/",
+      title: "E-Commerce",
+    },
+    
+    "Pages",
     {
       icon: "BookOpen",
       pathname: "/filieres",
-      title: "Filièr",
+      title: "Filières",
+    },
+    {
+      icon: "Clock",
+      pathname: "/niveaux",
+      title: "Niveaux",
     },
     {
       icon: "Book",
@@ -35,14 +47,15 @@ const initialState: SideMenuState = {
     },
     {
       icon: "Clock",
-      pathname: "/niveaux",
-      title: "Niveaux",
+      pathname: "/provisoire",
+      title: "Emploi du temps provisoire",
     },
     {
       icon: "GaugeCircle",
-      pathname: "/",
-      title: "E-Commerce",
+      pathname: "/professeurs",
+      title: "Gestion des professeurs",
     },
+    
     {
       icon: "ActivitySquare",
       pathname: "/dashboard-overview-2",
