@@ -155,6 +155,7 @@ function Main() {
         setMatieres(matieresData);
         setSalles(sallesData);
         setEdt(edtData);
+        console.log(edtData);
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
         showNotification("error", "Erreur lors du chargement des données.");

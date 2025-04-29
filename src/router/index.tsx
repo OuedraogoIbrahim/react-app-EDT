@@ -337,12 +337,17 @@ function Router() {
     },
 
     {
+      path: "/login/success",
+      element: <LoginSuccess />,
+    },
+
+    {
       element: <Guest />,
       children: [
-        {
-          path: "/login/success",
-          element: <LoginSuccess />,
-        },
+        // {
+        //   path: "/login/success",
+        //   element: <LoginSuccess />,
+        // },
         {
           path: "/login",
           element: <Login />,

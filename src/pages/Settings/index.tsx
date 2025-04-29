@@ -222,11 +222,13 @@ function Main() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = API_URL + "/api/auth/google/redirect";
+    window.location.href =
+      API_URL + "/api/auth/google/redirect?userId=" + parsedUser.id;
   };
 
   const handleGithubLogin = () => {
-    window.location.href = API_URL + "/api/auth/github/redirect";
+    window.location.href =
+      API_URL + "/api/auth/github/redirect?userId=" + parsedUser.id;
   };
 
   const handleFacebookLogin = () => {
