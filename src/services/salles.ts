@@ -5,6 +5,7 @@ import configApi from "./api";
 interface Salle {
     id: number; 
     nom : string , 
+    capacite : number,
     description : string,
 }
 export const getSalles = async () => {

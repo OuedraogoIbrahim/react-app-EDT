@@ -203,9 +203,8 @@ function Main() {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      setBasicSlideoverPreview(false);
       await provisionalEDT(data);
-      showNotification("success", "Cours ajouté avec succès.");
+      showNotification("success", "EDT provisoire ajouté avec succès.");
       reset();
       setBasicSlideoverPreview(false);
     } catch (error) {

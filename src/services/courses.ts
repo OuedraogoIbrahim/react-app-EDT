@@ -182,6 +182,8 @@ export const getProvisionalEDT = async () => {
 export const provisionalEDT = async (data: ProvisionalEDT) => {
   try {
     const response = await configApi.post('emploi-du-temps/provisoire',data)
+    console.log(response.data);
+    
     return;
   } catch (error: unknown) {
     const err = error as AxiosError;

@@ -30,8 +30,8 @@ function Main() {
     email: "",
     password: "",
   });
-
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -46,6 +46,7 @@ function Main() {
         [name]: "",
       }));
     }
+    setErrorMessage(""); // Clear error message on input change
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -60,11 +61,14 @@ function Main() {
       setFormErrors(validationErrors);
       return;
     }
+
     try {
       setLoading(true);
+      setErrorMessage(""); // Clear previous errors
       await login(formData.email, formData.password);
       nav("/emploi-du-temps");
     } catch (error) {
+      setErrorMessage("Échec de la connexion. Vérifiez vos identifiants.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -80,8 +84,7 @@ function Main() {
   };
 
   const handleFacebookLogin = () => {
-    alert("Pas encore implemeter");
-    // window.location.href = API_URL + "/api/auth/facebook/redirect";
+    alert("Pas encore implémenté");
   };
 
   return (
@@ -131,14 +134,37 @@ function Main() {
                   </>
                 )}
               </Alert>
+              {errorMessage && (
+                <Alert
+                  variant="outline-danger"
+                  className="flex items-center px-4 py-3 mb-6 bg-danger/5 border-danger/20 rounded-[0.6rem]"
+                >
+                  {({ dismiss }) => (
+                    <>
+                      <Lucide
+                        icon="AlertCircle"
+                        className="stroke-[0.8] w-6 h-6 mr-2 fill-danger/10"
+                      />
+                      <div className="ml-1 mr-8">{errorMessage}</div>
+                      <Alert.DismissButton
+                        type="button"
+                        className="btn-close text-danger"
+                        onClick={dismiss}
+                        aria-label="Fermer"
+                      >
+                        <Lucide icon="X" className="w-5 h-5" />
+                      </Alert.DismissButton>
+                    </>
+                  )}
+                </Alert>
+              )}
               <form className="mt-6" onSubmit={handleSubmit}>
                 <div className="mb-5">
                   <FormLabel>Email*</FormLabel>
                   <FormInput
                     type="text"
                     name="email"
-                    className={`block px-4 py-3.5 rounded-[0 Niemiec
-                    .6rem] border-slate-300/80 ${
+                    className={`block px-4 py-3.5 rounded-[0.6rem] border-slate-300/80 ${
                       formErrors.email ? "border-red-500" : ""
                     }`}
                     value={formData.email}
@@ -172,7 +198,10 @@ function Main() {
                   <Button
                     variant="primary"
                     rounded
-                    className="bg-gradient-to-r from-theme-1/70 to-theme-2/70 w-full py-3.5 xl:mr-3 dark:border-darkmode-400"
+                    className={`bg-gradient-to-r from-theme-1/70 to-theme-2/70 w-full py-3.5 xl:mr-3 dark:border-darkmode-400 ${
+                      loading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
+                    disabled={loading}
                   >
                     {loading ? (
                       <LoadingIcon
@@ -202,13 +231,13 @@ function Main() {
                       <Lucide icon="Github" className="w-5 h-5 mr-2" />
                       GitHub
                     </Button>
-                    <Button
+                    {/* <Button
                       onClick={handleFacebookLogin}
                       className="flex items-center justify-center w-full sm:w-1/3 py-2 border border-slate-300/80 rounded-[0.6rem] hover:bg-slate-50 dark:border-darkmode-400 dark:hover:bg-darkmode-500"
                     >
                       <Lucide icon="Facebook" className="w-5 h-5 mr-2" />
                       Facebook
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </form>
@@ -237,7 +266,7 @@ function Main() {
               Optimisez la Gestion <br /> de l'emploi du temps
             </div>
             <div className="mt-5 text-base leading-relaxed xl:text-lg text-white/70">
-              Simplifiez la gestion de vos contacts avec notre solution
+              Simplifiez la gestion de vos emplois de temps avec notre solution
               intuitive et efficace. Organisez, suivez et centralisez toutes vos
               interactions en un seul endroit pour une productivité optimale.
             </div>

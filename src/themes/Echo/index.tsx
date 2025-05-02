@@ -154,7 +154,7 @@ function Main() {
                 </div>
               </div>
               <div className="ml-3.5 group-[.side-menu--collapsed.side-menu--on-hover]:xl:opacity-100 group-[.side-menu--collapsed]:xl:opacity-0 transition-opacity font-medium">
-                ECHO
+                Planify
               </div>
             </a>
             <a
