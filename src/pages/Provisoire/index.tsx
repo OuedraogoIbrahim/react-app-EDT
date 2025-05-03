@@ -14,7 +14,11 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import Litepicker from "@/components/Base/Litepicker";
 import Notification from "@/components/Base/Notification";
 import Toastify from "toastify-js";
-import { getProvisionalEDT, provisionalEDT } from "@/services/courses";
+import {
+  deleteEDT,
+  getProvisionalEDT,
+  provisionalEDT,
+} from "@/services/courses";
 import _ from "lodash";
 
 import products from "@/fakers/products";
@@ -32,7 +36,8 @@ interface Filiere {
 interface Salle {
   id: number;
   nom: string;
-  description: string;
+  capacite: number;
+  description: string | null;
 }
 
 interface Matiere {
@@ -53,6 +58,7 @@ interface FormData {
 }
 
 interface edtData {
+  id: number;
   date_creation: string;
   niveau_id: number;
   date: string;
@@ -239,9 +245,9 @@ function Main() {
   const handleDelete = async (edtItem: edtData) => {
     setLoading(true);
     try {
-      //   await deleteEDT(edtItem.id);
+      await deleteEDT(edtItem.date_creation, edtItem.niveau_id);
       showNotification("success", "EDT supprimé avec succès.");
-      //   setEdt((prevEdt) => prevEdt.filter((edt) => edt.id !== edtItem.id));
+      setEdt((prevEdt) => prevEdt.filter((edt) => edt.id !== edtItem.id));
       setShowDeleteModal(false);
     } catch (error) {
       console.error("Erreur lors de la suppression de l'EDT :", error);

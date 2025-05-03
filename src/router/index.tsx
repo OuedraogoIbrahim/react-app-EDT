@@ -89,7 +89,7 @@ function Router() {
         //   element: <Register />,
         // },
         {
-          path: "/landing-page",
+          path: "/",
           element: <LandingPage />,
         },
       ],

@@ -301,7 +301,7 @@ function Main() {
                   />
                   Services Connectés
                 </Link>
-                <Link
+                {/* <Link
                   to="/settings?page=account-deactivation"
                   className={clsx([
                     "flex items-center py-3 first:-mt-3 last:-mb-3 [&.active]:text-primary [&.active]:font-medium hover:text-primary",
@@ -313,7 +313,7 @@ function Main() {
                 >
                   <Lucide icon="Trash2" className="stroke-[1.3] w-4 h-4 mr-3" />
                   Désactivation du Compte
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
@@ -683,7 +683,7 @@ function Main() {
                   Services Connectés
                 </div>
                 <div>
-                  <div className="flex items-center pt-2.5 mt-2.5 last:mb-2 first:mt-0 first:pt-0">
+                  {/* <div className="flex items-center pt-2.5 mt-2.5 last:mb-2 first:mt-0 first:pt-0">
                     <div>
                       <div className="flex items-center justify-center w-10 h-10 ml-2 border rounded-full border-primary/10 bg-primary/10">
                         <Lucide
@@ -710,7 +710,7 @@ function Main() {
                         />
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="flex items-center pt-2.5 mt-2.5 last:mb-2 first:mt-0 first:pt-0">
                     <div>
                       <div className="flex items-center justify-center w-10 h-10 ml-2 border rounded-full border-primary/10 bg-primary/10">
@@ -803,20 +803,20 @@ function Main() {
                         <Lucide icon="Github" className="w-5 h-5 mr-2" />
                         GitHub
                       </Button>
-                      <Button
+                      {/* <Button
                         onClick={handleFacebookLogin}
                         className="flex items-center justify-center w-full sm:w-1/3 py-2 border border-slate-300/80 rounded-[0.6rem] hover:bg-slate-50 dark:border-darkmode-400 dark:hover:bg-darkmode-500"
                       >
                         <Lucide icon="Facebook" className="w-5 h-5 mr-2" />
                         Facebook
-                      </Button>
+                      </Button> */}
                     </div>
                   </Dialog.Panel>
                 </Dialog>
               </div>
             )}
 
-            {queryParams.get("page") === "account-deactivation" && (
+            {/* {queryParams.get("page") === "account-deactivation" && (
               <div className="flex flex-col p-5 box box--stacked">
                 <div className="flex items-center pb-5 mb-6 font-medium border-b border-dashed border-slate-300/70 text-[0.94rem]">
                   Désactivation du Compte
@@ -855,7 +855,7 @@ function Main() {
                   </Button>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>

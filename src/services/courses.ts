@@ -33,6 +33,7 @@ interface ProvisionalEDT {
 }
 
 interface edtData {
+  id : number;
   date_creation: string;
   niveau_id: number;
   date: string;
@@ -190,3 +191,13 @@ export const provisionalEDT = async (data: ProvisionalEDT) => {
     throw err.response?.data || new Error("Erreur lors de la creation de l'emploi du temps provisoire");
   }
 }
+
+export const deleteEDT = async (date_creation: string , niveau_id : number): Promise<void> => {
+  try {
+    await configApi.delete(`emploi-du-temps/provisoire/${date_creation}/${niveau_id}`);
+    // Pas de return si l'API renvoie 204 No Content
+  } catch (error: unknown) {
+    const err = error as AxiosError;
+    throw err.response?.data || new Error("Erreur lors de la suppression de l'EDT");
+   }
+};

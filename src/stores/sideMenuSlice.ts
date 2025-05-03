@@ -45,18 +45,18 @@ const initialState: SideMenuState = {
       pathname: "/emploi-du-temps",
       title: "Emploi du Temps",
     },
-    {
-      icon: "Clock",
-      pathname: "/provisoire",
-      title: "Emploi du temps provisoire",
-    },
+    // {
+    //   icon: "Clock",
+    //   pathname: "/provisoire",
+    //   title: "Emploi du temps provisoire",
+    // },
     {
       icon: "Users",
       pathname: "/professeurs",
       title: "Gestion des professeurs",
     },
     {
-      icon: "Users",
+      icon: "Building",
       pathname: "/salles",
       title: "Gestion des salles",
     }

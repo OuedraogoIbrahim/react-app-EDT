@@ -32,14 +32,15 @@ function Main(props: MainProps) {
           </a>
           <Slideover.Title className="px-6 py-5">
             <h2 className="mr-auto text-base font-medium">Notifications</h2>
-            <Button variant="outline-secondary" className="hidden sm:flex">
-              <Lucide icon="ShieldCheck" className="w-4 h-4 mr-2" /> Mark all as
-              read
-            </Button>
+            {/* <Button variant="outline-secondary" className="hidden sm:flex">
+              <Lucide icon="ShieldCheck" className="w-4 h-4 mr-2" />
+              Marquer tout comme lu
+            </Button> */}
           </Slideover.Title>
           <Slideover.Description className="p-0">
             <div className="flex flex-col p-3 gap-0.5">
-              {activities.fakeActivities().map((faker, fakerKey) => (
+              Aucune notification
+              {/* {activities.fakeActivities().map((faker, fakerKey) => (
                 <a
                   href=""
                   key={fakerKey}
@@ -90,7 +91,7 @@ function Main(props: MainProps) {
                     <div className="flex-none w-2 h-2 ml-auto border rounded-full bg-primary/40 border-primary/40"></div>
                   )}
                 </a>
-              ))}
+              ))} */}
             </div>
           </Slideover.Description>
         </Slideover.Panel>
